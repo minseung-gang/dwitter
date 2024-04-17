@@ -1,26 +1,19 @@
-import * as userRepository from "../data/auth.js";
+import * as userRepository from "./auth.js";
 
 let tweets = [
   {
     id: "1",
-    text: "Dream coders!",
+    text: "드림코더분들 화이팅!",
     createdAt: new Date().toString(),
     userId: "1",
   },
   {
     id: "2",
-    text: "Dream coders!",
+    text: "안뇽!",
     createdAt: new Date().toString(),
     userId: "1",
   },
 ];
-
-// 데이터베이스나 클라우드에서 데이터를 읽어오는 순수한 읽기/쓰기 전용 로직이 사용됨
-
-export async function Username(username) {
-  const tweets = await getAll();
-  return tweets.filter((tweet) => tweet.username === username);
-}
 
 export async function getAll() {
   return Promise.all(
@@ -33,11 +26,19 @@ export async function getAll() {
   );
 }
 
+export async function getAllByUsername(username) {
+  return getAll().then((tweets) =>
+    tweets.filter((tweet) => tweet.username === username)
+  );
+}
+
 export async function getById(id) {
-  const tweet = tweets.find((tweet) => tweet.id === id);
-  if (!tweet) null;
-  const { username, name, url } = await userRepository.findById(tweet.userId);
-  return { ...tweet, username, name, url };
+  const found = tweets.find((tweet) => tweet.id === id);
+  if (!found) {
+    return null;
+  }
+  const { username, name, url } = await userRepository.findById(found.userId);
+  return { ...found, username, name, url };
 }
 
 export async function create(text, userId) {
@@ -56,9 +57,9 @@ export async function update(id, text) {
   if (tweet) {
     tweet.text = text;
   }
-  return tweet;
+  return getById(tweet.id);
 }
 
 export async function remove(id) {
-  tweets.filter((tweet) => tweet.id !== id);
+  tweets = tweets.filter((tweet) => tweet.id !== id);
 }
