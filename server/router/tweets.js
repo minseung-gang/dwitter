@@ -1,23 +1,34 @@
-import express from "express";
-import * as tweetController from "../controller/tweet.js";
-import { isAuth } from "../middleware/auth.js";
+import express from 'express';
+import 'express-async-errors';
+import { body } from 'express-validator';
+import * as tweetController from '../controller/tweet.js';
+import { isAuth } from '../middleware/auth.js';
+import { validate } from '../middleware/validator.js';
 
 const router = express.Router();
 
-router.get("/", isAuth, tweetController.getTweets);
+const validateTweet = [
+  body('text')
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage('text should be at least 3 characters'),
+  validate,
+];
 
-router.get("/:id", isAuth, tweetController.getTweet);
+// GET /tweet
+// GET /tweets?username=:username
+router.get('/', isAuth, tweetController.getTweets);
 
-router.post("/", isAuth, tweetController.createTweet);
+// GET /tweets/:id
+router.get('/:id', isAuth, tweetController.getTweet);
 
-router.put("/:id", isAuth, tweetController.updateTweet);
+// POST /tweeets
+router.post('/', isAuth, validateTweet, tweetController.createTweet);
 
-router.delete("/:id", isAuth, tweetController.deleteTweet);
+// PUT /tweets/:id
+router.put('/:id', isAuth, validateTweet, tweetController.updateTweet);
+
+// DELETE /tweets/:id
+router.delete('/:id', isAuth, tweetController.deleteTweet);
 
 export default router;
-
-/* 
-  router는 말 그대로 주어진 경로에 대해 어떤 함수를 연결할 것인지 용도로만 사용해야 합니다.
-  라우터 자체가 다른 구현 사항이나 서비스의 비즈니스 로직을 가지고 있으면 라우터라는 순수 역할에서 벗어나서
-  그 이상의 것을 하게되는 것이기 때문.
-*/
